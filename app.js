@@ -53,13 +53,15 @@ app.post("/call", async (req, res) => {
       return res.redirect("/thankyou");
     }
 
+    // Encode the user's phone number to make it URL-safe
+const encodedUserId = encodeURIComponent(user.phone);
     // Make Twilio call
     await client.calls.create({
       from: process.env.TWILIO_PHONE_NUMBER,
       to: user.phone,
       url: `https://api.vapi.ai/twilio/outbound_call?assistantId=198cf54e-0414-4789-88a8-cab50e37e697`,
-      statusCallback: `${process.env.BASE_URL}/call-status?userId=${user.phone}`,
-      statusCallbackEvent: ["ringing", "answered", "completed"],
+      statusCallback: `${process.env.BASE_URL}/call-status?userId=${encodedUserId}`,
+  statusCallbackEvent: ["ringing", "answered", "completed"],
     });
 
     res.render("call-processing", { user });

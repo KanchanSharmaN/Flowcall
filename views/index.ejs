@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flowcall - Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-r from-blue-50 to-blue-100 flex flex-col items-center justify-center min-h-screen font-sans">
+  
+  <div class="bg-white shadow-2xl rounded-2xl p-10 max-w-md w-full text-center">
+    <h1 class="text-3xl font-bold text-blue-600 mb-6">Welcome to <span class="text-indigo-600">Flowcall</span></h1>
+    <p class="text-gray-600 mb-6">Connect instantly with our agent or chat with our AI bot.</p>
+
+    <!-- Call Form -->
+    <form action="/call" method="POST" class="space-y-4">
+      <input type="text" name="username" placeholder="Enter your name" 
+             class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+      <button type="submit" 
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-200">
+        Call Agent
+      </button>
+    </form>
+
+    <!-- Error Message -->
+    <!-- Error Message -->
+<% if (typeof error !== "undefined" && error) { %>
+  <p class="mt-4 text-red-500 font-medium"><%= error %></p>
+<% } %>
+
+
+    <div class="mt-6">
+      <a href="/chatbot" 
+         class="inline-block text-indigo-600 hover:text-indigo-800 font-medium transition duration-200">
+        💬 Chat with our Bot
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>
+
+
+
+
+

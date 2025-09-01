@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flowcall - Call Processing</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Pulsing animation for call status */
+    @keyframes pulseScale {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .pulse {
+      animation: pulseScale 1.5s infinite;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-r from-green-50 to-green-100 flex flex-col items-center justify-center min-h-screen font-sans">
+
+  <div class="bg-white shadow-2xl rounded-2xl p-10 max-w-md w-full text-center pulse">
+    <h1 class="text-3xl font-bold text-green-600 mb-6">📞 Your Call is Processing...</h1>
+    <p class="text-gray-600 mb-4">Hey <span class="font-semibold text-green-700"><%= user.name %></span>,</p>
+    <p class="text-gray-600 mb-4">We’re connecting you on <b><%= user.phone %></b>. Please wait a moment.</p>
+    <p class="text-gray-500 text-sm">Once the call is answered, you’ll be redirected automatically.</p>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const currentUserPhone = "<%= user.phone %>";
+    const socket = io();
+
+    function redirectToThankYou() {
+      window.location.href = '/thankyou';
+    }
+
+    // Check if call was already answered (page refresh)
+    fetch(`/call-check?phone=${encodeURIComponent(currentUserPhone)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.answered) {
+          console.log('Call already answered. Redirecting...');
+          redirectToThankYou();
+        }
+      })
+      .catch(err => console.error('Error checking call status:', err));
+
+    // Listen for callAnswered event via WebSocket
+    socket.on('callAnswered', (data) => {
+      const normalizedCurrentUserPhone = currentUserPhone.replace(/\s/g, '');
+      const normalizedReceivedId = data.userId.replace(/\s/g, '');
+
+      if (normalizedReceivedId === normalizedCurrentUserPhone) {
+        console.log('✅ Call answered! Redirecting to /thankyou...');
+        setTimeout(redirectToThankYou, 1000); // small delay
+      } else {
+        console.log('Mismatch:', {
+          browserId: normalizedCurrentUserPhone,
+          receivedId: normalizedReceivedId
+        });
+      }
+    });
+
+    // Fallback redirect after 60 seconds
+    setTimeout(() => {
+      console.log('Fallback redirect to /thankyou');
+      redirectToThankYou();
+    }, 60000);
+  </script>
+
+</body>
+</html>
+
+
+
+

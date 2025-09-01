@@ -71,18 +71,34 @@ app.post("/call", async (req, res) => {
 });
 
 // Twilio status webhook
+// Twilio status webhook
 app.post("/call-status", (req, res) => {
-  const status = req.body.CallStatus;
-  const userId = req.query.userId;
+  try {
+    const status = req.body.CallStatus;
+    const userId = req.query.userId;
 
-  console.log(`📞 Webhook for ${userId}: Status=${status}`);
+    // This log will tell us if the request ever reaches the server
+    console.log("--- INCOMING TWILIO WEBHOOK ---");
+    console.log(`Received Status: ${status} for User ID: ${userId}`);
+    
+    if (!status || !userId) {
+      console.error("❌ Webhook received but status or userId is missing.");
+      return res.sendStatus(400); // Bad Request
+    }
 
-  if (status === "in-progress") {
-    answeredCalls[userId] = true;
-    io.emit("callAnswered", { userId });
+    if (status === "in-progress" || status === "answered") {
+      console.log(`✅ Call is in-progress for ${userId}. Emitting 'callAnswered' event.`);
+      answeredCalls[userId] = true;
+      io.emit("callAnswered", { userId });
+    }
+
+    res.sendStatus(200);
+
+  } catch (error) {
+    // This will catch any crash inside the route
+    console.error("🚨 CRITICAL ERROR in /call-status ROUTE:", error);
+    res.sendStatus(500);
   }
-
-  res.sendStatus(200);
 });
 
 // WebSocket connection
@@ -105,8 +121,3 @@ app.get("/thankyou", (req, res) => {
 // Use Render port or 3000 locally
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-
-
-
